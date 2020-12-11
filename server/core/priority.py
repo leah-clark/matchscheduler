@@ -11,7 +11,6 @@ def populate_squads(available_squads, squad_letters, shift_time, squad_preferenc
         squad = Squad(name=letter, hours=available_squads[letter].values[0], shift_time=shift_time)
         squad.preferences = squad_preferences[letter]
         squads.append(squad)
-        print(squad.name, squad.hours, squad.preferences)
     return squads
 
 def find_squad_with_most_hours(squads):
@@ -19,6 +18,7 @@ def find_squad_with_most_hours(squads):
 
 def reassign_game(row, squads, carry_over_games):
     squad = find_squad_with_most_hours(squads)
+    print("Squad: " + str(squad.name))
     if squad.hours > 10:
         squad = add_match_to_schedule(10, squad, row.ID)
     else:
