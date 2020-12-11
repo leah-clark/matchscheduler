@@ -14,15 +14,19 @@ class TestGameScheduler(unittest.TestCase):
     def test_scheduler_data_set_1(self):
         # given
         shift_time = datetime(year=2019, month=4, day=16, hour=10, minute=0)
-        match_schedule = []
         squads_by_date = test_helper.get_squads(1)
         matches = test_helper.get_matches(1)
-        preferences = pd.read_csv("testdata/preferences.csv")
+        preferences = get_squad_preferences(pd.read_csv("testdata/preferences.csv"))
         # when
         squad_letters = ['B+', 'E', 'D+', 'G', 'D', 'B', 'C', 'A']
-        output, left_over_matches = \
-            schedule_days_matches(shift_time, matches, preferences, squads_by_date, squad_letters, match_schedule)
-        # then
+        squads, left_over_matches = \
+            schedule_days_matches(shift_time, matches, preferences, squads_by_date, squad_letters)
+        output = []
+        for squad in squads:
+            if(squad.match_ids != []):
+                for id in squad.match_ids:
+                    output.append([squad.shift_time, squad.name, id])
+        #then
         result = pd.DataFrame(output, columns=['Date', 'Squad', 'Game ID'])
         print(result)
         self.assertEqual(left_over_matches, [])
