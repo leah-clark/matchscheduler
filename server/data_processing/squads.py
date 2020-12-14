@@ -4,7 +4,7 @@ from functools import reduce
 def _get_table_by_condition(data_frame, column_name, specified_value):
     return data_frame.loc[data_frame[column_name] == specified_value]
 
-def format(schedule):
+def formats(schedule):
     dfs = []
 
     squads = set(schedule['Squad'])
@@ -14,9 +14,9 @@ def format(schedule):
         squad_data = []
         for row in available_by_squad.itertuples():
             if row.Shift == 'Night':
-                squad_data.append([pd.to_datetime(row.Date + " " + "18:00"), row.Quantity])
+                squad_data.append([pd.to_datetime(row.Date + " " + "18:00"), row.Quantity*8])
             else:
-                squad_data.append([pd.to_datetime(row.Date + " " + "10:00"), row.Quantity])
+                squad_data.append([pd.to_datetime(row.Date + " " + "10:00"), row.Quantity*8])
 
         dfs.append(pd.DataFrame(squad_data, columns=['Date', squad]))
 

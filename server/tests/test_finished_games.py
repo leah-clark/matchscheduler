@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 from datetime import datetime, timedelta
 
-from matches import format
+from matches import formats
 from finished_games import get_finished_games
 
 
@@ -13,7 +13,7 @@ class TestFinishedGames(unittest.TestCase):
     def test_finished_games(self):
         # given
         match_data = pd.read_csv("testdata/matches.csv")
-        matches = format(match_data)
+        matches = formats(match_data)
         datetime_schedule = datetime(year=2019, month=4, day=1, hour=20, minute=50)
         end_time = datetime_schedule + timedelta(minutes=60)
         # when
@@ -26,7 +26,7 @@ class TestFinishedGames(unittest.TestCase):
     def test_finished_games_before_ten(self):
         # given
         match_data = pd.read_csv("testdata/matches.csv")
-        matches = format(match_data)
+        matches = formats(match_data)
         datetime_schedule = datetime(year=2019, month=4, day=15, hour=10, minute=00)
         # when
         output = None
@@ -38,5 +38,3 @@ class TestFinishedGames(unittest.TestCase):
         self.assertEqual(len(output), 4)
         self.assertEqual(output.loc[0]['ID'], 46330)
 
-    def test_update_matches(self):
-        return 'true'
