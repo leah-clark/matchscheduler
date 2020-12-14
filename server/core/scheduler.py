@@ -22,11 +22,11 @@ def find_squad_with_most_hours(squads):
 
 def reassign_game(row, squads, carry_over_ids):
     squad = find_squad_with_most_hours(squads)
-    print("Squad: " + str(squad.name))
+    #print("Squad: " + str(squad.name))
     if squad.hours > 10:
         squad = add_match_to_schedule(10, squad, row.ID)
     else:
-        print("This game will have to be carried over to tomorrow..")
+        #print("This game will have to be carried over to tomorrow..")
         carry_over_ids.append(row.ID)
     return squad, carry_over_ids
 
@@ -40,7 +40,7 @@ def get_preferred_squad(squads, row):
 
 def add_match_to_schedule(time_taken, squad, match_id):
     squad.add_match_id(match_id)
-    print("Match added to schedule... ")
+    #print("Match added to schedule... ")
     squad.hours -= time_taken
     return squad
 
@@ -53,19 +53,20 @@ def schedule_days_matches(shift_time, matches, preferences, available_squads, sq
         # get the squad that prefers this competition
         # assume 1 preference for 1 team for 1 competition
         squad = get_preferred_squad(squads, row)
-        print("Competition: " + row.Competition)
+        #print("Competition: " + row.Competition)
 
         if row.Deadline < shift_time:
-            print("Late game!")
+            time_late = shift_time - row.Deadline
+            print("Game " + str(row.ID) + " is late by " + str(time_late))
 
         # if the squad is prefered - asign game
         if squad and squad.hours > 8:
-            print("Squad: " + str(squad.name))
-            print("Scheduling via preferece.. ")
+            #print("Squad: " + str(squad.name))
+            #print("Scheduling via preferece.. ")
             squad = add_match_to_schedule(8, squad, row.ID)
         # if not then give to squad wiht most availability
         else:
-            print("Scheduling via size of squad.. ")
+            #print("Scheduling via size of squad.. ")
             squad, carry_over_ids = reassign_game(row, squads, carry_over_ids)
         # if any games left over - get put in next round, sorted in order
     return squads, carry_over_ids
@@ -124,8 +125,8 @@ def schedule(matches, preferences, squads_df, squad_letters, competitions):
         games_plus_carryover = add_games(games, carry_over_ids, matches)
         games_plus_carryover_sorted = games_plus_carryover.sort_values('Deadline')
 
-        print("Shift is: " + str(row.Date))
-        # change to row
+        #print("Shift is: " + str(row.Date))
+
         available_squads = squads_df.loc[squads_df['Date'] == row.Date]
 
         squads, carry_over_ids = schedule_days_matches(
@@ -133,4 +134,7 @@ def schedule(matches, preferences, squads_df, squad_letters, competitions):
 
         match_schedule = sort_output(squads, match_schedule, row.Date)
 
+    print("games not watched: " )
+    for game in carry_over_ids:
+        print(game)
     return pd.DataFrame(match_schedule, columns=['Date', 'Squad', 'Game ID'])

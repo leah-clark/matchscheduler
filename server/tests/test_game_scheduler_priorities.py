@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 
 from preferences import get_squad_preferences
-from priority import schedule_days_matches, schedule
+from scheduler import schedule_days_matches, schedule
 
 from competitions import get_competition_priorities_kv_pair
 from matches import formats
