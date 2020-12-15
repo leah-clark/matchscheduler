@@ -21,12 +21,12 @@ class SquadHandler:
 
     def get_preferred_squad(self, game):
         for squad in self.squads:
-            if game.Competition in squad.preferences:
+            if game.competition in squad.preferences:
                 return squad
         return None
 
     def reassign_game(self, game):
-        squad = self.find_squad_with_most_hours()
+        squad = self._find_squad_with_most_hours()
         print("Squad: " + str(squad.name))
         if squad.hours > 10:
             self.add_match_to_schedule(10, squad, game)

@@ -37,10 +37,12 @@ class GameHandler:
         finished_games['Deadline'] = finished_games['Finish Date & Time'].apply(
             lambda org_date: self.priorities.add(org_date))
         # sometimes there are no games
+
         if (not finished_games.empty):
             for finished_game in finished_games.itertuples():
                 game = Game(competition=finished_game.Competition, game_id=finished_game.ID, deadline=finished_game.Deadline)
                 self.games.append(game)
+        print(self.games)
 
     def _get_finished_games(self, starting_time, datetime_schedule):
         return self.matches.loc[np.logical_and(
