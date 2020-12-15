@@ -17,3 +17,10 @@ class Squad:
         for game in self.games:
             game_ids.append(game.game_id)
         return game_ids
+
+    def get_late_games(self):
+        late_games = []
+        for game in self.games:
+            if game.Late.is_late:
+                late_games.append(game.Late)
+        return late_games

@@ -3,19 +3,25 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from competitions import get_competition_priorities_kv_pair
-from matches import formats
+from matches import create_match_data
 from game_handler import GameHandler
 from priorities import Priorities
 
 
-class TestFinishedGames(unittest.TestCase):
+class TestGameHandler(unittest.TestCase):
+    match_data = pd.read_csv("testdata/matches.csv")
+    match_data = pd.read_csv("testdata/matches.csv")
+    competition_data = pd.read_csv("testdata/competitions.csv")
+    priorities_data = pd.read_csv("testdata/priorities.csv")
 
-    # integration
+    def setup(self):
+        matches = create_match_data(self.match_data)
+        game_handler = GameHandler(matches_df=matches, priorities=None, competitions=None, games=[])
+        return matches, game_handler
+
     def test_finished_games(self):
         # given
-        match_data = pd.read_csv("testdata/matches.csv")
-        matches = formats(match_data)
-        game_handler = GameHandler(matches_df=matches, priorities=None, competitions=None, games=[])
+        matches, game_handler = self.setup()
         datetime_schedule = datetime(year=2019, month=4, day=1, hour=20, minute=50)
         end_time = datetime_schedule + timedelta(minutes=60)
         # when
@@ -27,9 +33,7 @@ class TestFinishedGames(unittest.TestCase):
 
     def test_finished_games_before_ten(self):
         # given
-        match_data = pd.read_csv("testdata/matches.csv")
-        matches = formats(match_data)
-        game_handler = GameHandler(matches_df=matches, priorities=None, competitions=None, games=[])
+        matches, game_handler = self.setup()
         datetime_schedule = datetime(year=2019, month=4, day=15, hour=10, minute=00)
         # when
         output = None
@@ -42,13 +46,9 @@ class TestFinishedGames(unittest.TestCase):
         self.assertEqual(output.loc[520]['ID'], 46327)
 
     def test_sorting(self):
-        match_data = pd.read_csv("testdata/matches.csv")
-        competition_data = pd.read_csv("testdata/competitions.csv")
-        priorities_data = pd.read_csv("testdata/priorities.csv")
-        matches = formats(match_data)
-        competitions = get_competition_priorities_kv_pair(priorities_data, competition_data)
-        game_handler = GameHandler(matches_df=matches, priorities=Priorities(), competitions=competitions, games=[])
-
+        competitions = get_competition_priorities_kv_pair(self.priorities_data, self.competition_data)
+        matches, game_handler = self.setup()
+        game_handler.competitions = competitions
         datetime_schedule = datetime(year=2019, month=4, day=15, hour=10, minute=00)
         # when
         game_handler.populate_games(datetime_schedule)

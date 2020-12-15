@@ -1,8 +1,12 @@
 from models.Squad import Squad
 from operator import attrgetter
+import logging
 
-#todo: get these from data rather than hard coded
+# todo: get these from data rather than hard coded
 squad_letters = ['B+', 'E', 'D+', 'G', 'D', 'B', 'C', 'A']
+
+logger = logging.getLogger("SquadHandler")
+
 
 class SquadHandler:
 
@@ -28,15 +32,13 @@ class SquadHandler:
 
     def reassign_game(self, game):
         squad = self._find_squad_with_most_hours()
-        #print("Squad: " + str(squad.name))
+        logger.info("Squad: " + str(squad.name))
         if squad.hours > 10:
             self.add_game_to_schedule(10, squad, game)
             game.is_assigned = True
-        else:
-            print("This game will have to be carried over to tomorrow..")
 
     def add_game_to_schedule(self, time_taken, squad, game):
         squad.add(game)
-        #print("Game added to schedule... ")
+        logger.info("Game added to schedule... ")
         squad.hours -= time_taken
         game.is_assigned = True

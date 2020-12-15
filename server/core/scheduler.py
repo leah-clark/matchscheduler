@@ -3,45 +3,50 @@ import os
 from game_handler import GameHandler
 from priorities import Priorities
 from squad_handler import SquadHandler
+import logging
+
+logger = logging.getLogger('scheduler')
 
 
 def schedule_days_games(shift_time, squad_handler, game_handler):
-    # this searches in 'deadline' order
+    # this searches in 'deadline' order, so most urgent games first
     game_handler.sort_games()
     for game in game_handler.games:
-        #print(game.deadline)
         # get the squad that prefers this competition
         # assume 1 preference for 1 team for 1 competition
         squad = squad_handler.get_preferred_squad(game)
-        #print("Competition: " + game.competition)
+        logger.info("Competition: " + game.competition)
 
         if game.deadline < shift_time:
             time_late = shift_time - game.deadline
-            print("Game " + str(game.game_id) + " is late by " + str(time_late))
+            game.set_late_game(time_late)
 
         # if the squad is preferred - assign game
         if squad and squad.hours > 8:
-            #print("Squad: " + str(squad.name))
-            #print("Scheduling via preferece.. ")
+            logger.info("Squad: " + str(squad.name))
+            logger.info("Scheduling via preferece.. ")
             squad_handler.add_game_to_schedule(8, squad, game)
 
         # if not then give to squad with most availability
         else:
-            #print("Scheduling via size of squad.. ")
+            logger.info("Scheduling via size of squad.. ")
             squad_handler.reassign_game(game)
     # if any games left over - get put in next round, sorted in order
     unassigned_games = game_handler.filter_unassigned_games()
     return squad_handler.squads, unassigned_games
 
 
-def configure_output(squads, game_schedule, date):
+def configure_game_output(squads, game_schedule, date):
     output = {}
     for squad in squads:
         output[squad.name] = set(squad.games)
 
     for key, value in output.items():
         for v in value:
-            game_schedule.append([date, key, v.game_id])
+            if v.Late.is_late:
+                game_schedule.append([date, key, v.game_id, v.Late.time_late])
+            else:
+                game_schedule.append([date, key, v.game_id, None])
     return game_schedule
 
 
@@ -65,16 +70,14 @@ def schedule(matches_df, preferences, squads_df, competitions):
         squad_handler = SquadHandler(squads_df)
         squad_handler.populate_squads(row.Date, preferences)
 
-        # Sort by deadline so we have most urgent games being worked on first
-
-        #print("Shift is: " + str(row.Date))
+        logger.info("Shift is: " + str(row.Date))
 
         squads, unassigned_games = schedule_days_games(row.Date, squad_handler, game_handler)
 
-        games_schedule = configure_output(squads, games_schedule, row.Date)
+        games_schedule = configure_game_output(squads, games_schedule, row.Date)
 
     unassigned_games_df = configure_unassigned_output(unassigned_games)
-    schedule_df = pd.DataFrame(games_schedule, columns=['Date', 'Squad', 'Game ID'])
+    schedule_df = pd.DataFrame(games_schedule, columns=['Date', 'Squad', 'Game ID', 'Late'])
 
     return schedule_df, unassigned_games_df
 

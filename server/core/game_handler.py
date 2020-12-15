@@ -28,7 +28,7 @@ class GameHandler:
             lambda org_date: self.priorities.add(org_date))
         # sometimes there are no games
 
-        if (not finished_games.empty):
+        if not finished_games.empty:
             for finished_game in finished_games.itertuples():
                 game = Game(competition=finished_game.Competition, game_id=finished_game.ID,
                             deadline=finished_game.Deadline)
@@ -49,6 +49,6 @@ class GameHandler:
     def filter_unassigned_games(self):
         unassigned_games = []
         for game in self.games:
-            if game.is_assigned == False:
+            if not game.is_assigned:
                 unassigned_games.append(game)
         return unassigned_games

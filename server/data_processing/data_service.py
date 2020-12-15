@@ -8,6 +8,7 @@ from matches import create_match_data
 import pandas as pd
 
 
+# process the cvs to a readable format for our algorithm
 def process_csvs(game_data):
     save_to_server(game_data)
     schedule = pd.read_csv(os.getcwd() + os.environ["DATA_PATH"] + '/schedule.csv')
