@@ -1,4 +1,4 @@
-from models.Squad import Squad
+from server.core.models.Squad import Squad
 from operator import attrgetter
 import logging
 

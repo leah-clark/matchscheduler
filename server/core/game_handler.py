@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import timedelta
-from models.Game import Game
+from server.core.models.Game import Game
 
 
 class GameHandler:

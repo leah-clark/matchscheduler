@@ -1,1 +1,1 @@
-DATA_PATH=/data/uploaded
+export DATA_PATH=/data/uploaded

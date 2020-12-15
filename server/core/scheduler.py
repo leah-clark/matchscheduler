@@ -1,8 +1,8 @@
 import pandas as pd
 import os
-from game_handler import GameHandler
-from priorities import Priorities
-from squad_handler import SquadHandler
+from server.core.game_handler import GameHandler
+from server.core.priorities import Priorities
+from server.core.squad_handler import SquadHandler
 import logging
 
 logger = logging.getLogger('scheduler')

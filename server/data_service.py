@@ -1,10 +1,10 @@
 import os
 
-from competitions import get_competition_priorities_kv_pair
-from upload import save_to_server
-from squads import create_schedule_data
-from preferences import get_squad_preferences
-from matches import create_match_data
+from server.data_processing.competitions import get_competition_priorities_kv_pair
+from server.upload import save_to_server
+from server.data_processing.squads import create_schedule_data
+from server.data_processing.preferences import get_squad_preferences
+from server.data_processing.matches import create_match_data
 import pandas as pd
 
 

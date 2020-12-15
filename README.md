@@ -63,13 +63,14 @@ in root directory
 
     cd api
     $env:FLASK_APP = "app.py"  
+    $env:FLASK_ENV= "development"
     python -m flask run
  
 # Run server on mac
  
 in root directory
 
-    cd api
-    flask run
+    cd server
+    FLASK_ENV=development flask run
  
 
