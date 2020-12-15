@@ -30,7 +30,11 @@ The output is a csv file that gives us all our scheduled games plus any that hav
 
 # Setup
 
-    python -m venv /path/to/new/virtual/env
+    python3 -m venv /path/to/new/virtual/env
+    mac:
+        source /path/to/new/virtual/env/bin/activate
+    windows:
+        /path/to/new/virtual/env/bin/activate
     pip install -r requirements.txt
 
 # Endpoint 
