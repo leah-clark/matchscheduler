@@ -8,6 +8,7 @@ from game_handler import GameHandler
 from priorities import Priorities
 
 
+# todo: tests for SquadHandler
 class TestGameHandler(unittest.TestCase):
     match_data = pd.read_csv("testdata/matches.csv")
     match_data = pd.read_csv("testdata/matches.csv")
@@ -26,7 +27,6 @@ class TestGameHandler(unittest.TestCase):
         end_time = datetime_schedule + timedelta(minutes=60)
         # when
         output = game_handler.get_finished_games(datetime_schedule, end_time)
-        print(output)
         # then
         self.assertEqual(len(output), 4)
         self.assertEqual(output.loc[4]['ID'], 49811)
@@ -41,7 +41,6 @@ class TestGameHandler(unittest.TestCase):
             output = game_handler.get_finished_games(
                 datetime_schedule - timedelta(hours=8), datetime_schedule)
         # then
-        print(output)
         self.assertEqual(len(output), 2)
         self.assertEqual(output.loc[520]['ID'], 46327)
 
@@ -51,6 +50,7 @@ class TestGameHandler(unittest.TestCase):
         game_handler.competitions = competitions
         datetime_schedule = datetime(year=2019, month=4, day=15, hour=10, minute=00)
         # when
+        game_handler.priorities = Priorities()
         game_handler.populate_games(datetime_schedule)
         game_handler.sort_games()
         # awful test but just a check to see if its all sorted manually
