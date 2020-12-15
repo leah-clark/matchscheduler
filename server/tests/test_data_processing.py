@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 
 from collectors import get_collector_hours_by_date
-from matches import formats
+from matches import create_match_data
 
 
 class TestDataProcessing(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestDataProcessing(unittest.TestCase):
         # given
         match_data = pd.read_csv("testdata/matches.csv")
         # when
-        matches = formats(match_data)
+        matches = create_match_data(match_data)
         # then
         self.assertEqual(matches.loc[0]['Finish Date & Time'],
                          datetime(year=2019, month=4, day=1, hour=2, minute=20))

@@ -4,33 +4,23 @@ from datetime import timedelta
 from models.Game import Game
 
 
-class Priorities:
-
-    def __init__(self):
-        self.priorities = []
-
-    def add(self, org_date):
-        return org_date + self.priorities.pop()
-
-    def populate(self, competitions, finished_games):
-        for game in finished_games.itertuples():
-            self.priorities.append(pd.offsets.Hour(competitions[game.Competition]))
-
-
 class GameHandler:
 
-    def __init__(self, matches, priorities, competitions, games):
+    def __init__(self, matches_df, priorities, competitions, games):
         self.competitions = competitions
-        self.matches = matches
+        self.matches_df = matches_df
         self.priorities = priorities
         self.games = games
+
+    def add(self, game):
+        self.games.append(game)
 
     def populate_games(self, date):
         if date.strftime('%H, %M') == "10, 00":
             start_time = date - timedelta(hours=16)
         else:
             start_time = date - timedelta(hours=8)
-        finished_games = self._get_finished_games(start_time, date)
+        finished_games = self.get_finished_games(start_time, date)
 
         self.priorities.populate(self.competitions, finished_games)
 
@@ -40,26 +30,25 @@ class GameHandler:
 
         if (not finished_games.empty):
             for finished_game in finished_games.itertuples():
-                game = Game(competition=finished_game.Competition, game_id=finished_game.ID, deadline=finished_game.Deadline)
-                self.games.append(game)
-        print(self.games)
+                game = Game(competition=finished_game.Competition, game_id=finished_game.ID,
+                            deadline=finished_game.Deadline)
+                self.add(game)
 
-    def _get_finished_games(self, starting_time, datetime_schedule):
-        return self.matches.loc[np.logical_and(
-            pd.to_datetime(self.matches['Finish Date & Time']) < datetime_schedule,
-            pd.to_datetime(self.matches['Finish Date & Time']) >= starting_time)]
+    def get_finished_games(self, starting_time, datetime_schedule):
+        return self.matches_df.loc[np.logical_and(
+            pd.to_datetime(self.matches_df['Finish Date & Time']) < datetime_schedule,
+            pd.to_datetime(self.matches_df['Finish Date & Time']) >= starting_time)]
 
     def add_games(self, games, carry_over_ids):
-        carry_over_games = self.matches[self.matches['ID'].isin(carry_over_ids)]
+        carry_over_games = self.matches_df[self.matches_df['ID'].isin(carry_over_ids)]
         return pd.concat([games, carry_over_games])
 
     def sort_games(self):
-        self.games.sort(key=lambda x: x.deadline, reverse=True)
+        self.games.sort(key=lambda x: x.deadline)
 
-    def filter_unassgined_games(self):
+    def filter_unassigned_games(self):
         unassigned_games = []
         for game in self.games:
             if game.is_assigned == False:
                 unassigned_games.append(game)
         return unassigned_games
-

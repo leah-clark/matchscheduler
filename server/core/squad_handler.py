@@ -1,6 +1,7 @@
 from models.Squad import Squad
 from operator import attrgetter
 
+#todo: get these from data rather than hard coded
 squad_letters = ['B+', 'E', 'D+', 'G', 'D', 'B', 'C', 'A']
 
 class SquadHandler:
@@ -27,15 +28,15 @@ class SquadHandler:
 
     def reassign_game(self, game):
         squad = self._find_squad_with_most_hours()
-        print("Squad: " + str(squad.name))
+        #print("Squad: " + str(squad.name))
         if squad.hours > 10:
-            self.add_match_to_schedule(10, squad, game)
-            game.assign_game(squad)
+            self.add_game_to_schedule(10, squad, game)
+            game.is_assigned = True
         else:
             print("This game will have to be carried over to tomorrow..")
 
-    def add_match_to_schedule(self, time_taken, squad, game):
-        squad.add_match_id(game)
-        print("Match added to schedule... ")
+    def add_game_to_schedule(self, time_taken, squad, game):
+        squad.add(game)
+        #print("Game added to schedule... ")
         squad.hours -= time_taken
-        game.assign_game(squad)
+        game.is_assigned = True

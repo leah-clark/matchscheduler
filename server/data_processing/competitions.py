@@ -5,8 +5,7 @@ def get_competition_priorities_kv_pair(priorities, competitions):
     pairs = {}
     for comp in competitions.itertuples():
         priority = comp.Priority
-        print(comp.Competition)
-        if (comp.Competition == 'Segunda División'):
+        if comp.Competition == 'Segunda División':
             pairs['Segunda DivisiÃ³n'] = priorities['Hours'][priority]
         else:
             pairs[comp.Competition] = priorities['Hours'][priority]

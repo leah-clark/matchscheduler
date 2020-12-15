@@ -6,6 +6,6 @@ def _add_finish_date_and_time(matches):
                                                   format='%d/%m/%Y %H:%M')
     matches['Finish Date & Time'] = matches['Match Date & Time'] + pd.offsets.Minute(110)
 
-def formats(matches):
+def create_match_data(matches):
     _add_finish_date_and_time(matches)
     return matches

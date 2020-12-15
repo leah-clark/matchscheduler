@@ -4,7 +4,7 @@ from functools import reduce
 def _get_table_by_condition(data_frame, column_name, specified_value):
     return data_frame.loc[data_frame[column_name] == specified_value]
 
-def formats(schedule):
+def create_schedule_data(schedule):
     dfs = []
 
     squads = set(schedule['Squad'])
