@@ -61,8 +61,7 @@ output:
 
 in root directory
 
-    cd api
-    $env:FLASK_APP = "app.py"  
+    $env:FLASK_APP = "server/views.py"  
     $env:FLASK_ENV= "development"
     python -m flask run
  
@@ -70,7 +69,7 @@ in root directory
  
 in root directory
 
-    cd server
-    FLASK_ENV=development flask run
+    FLASK_ENV=development FLASK_APP="server/views.py" flask run  
+
  
 

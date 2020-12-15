@@ -2,10 +2,10 @@ import unittest
 import pandas as pd
 from datetime import datetime, timedelta
 
-from competitions import get_competition_priorities_kv_pair
-from matches import create_match_data
-from game_handler import GameHandler
-from priorities import Priorities
+from server.data_processing.competitions import get_competition_priorities_kv_pair
+from server.data_processing.matches import create_match_data
+from server.core.game_handler import GameHandler
+from server.core.priorities import Priorities
 
 
 # todo: tests for SquadHandler

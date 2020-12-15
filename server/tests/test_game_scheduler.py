@@ -2,15 +2,15 @@ import unittest
 import pandas as pd
 from datetime import datetime
 
-from game_handler import GameHandler
-from priorities import Priorities
-from preferences import get_squad_preferences
-from scheduler import schedule_days_games, schedule
+from server.core.game_handler import GameHandler
+from server.core.priorities import Priorities
+from server.core.squad_handler import SquadHandler
+from server.core.scheduler import schedule_days_games, schedule
 
-from competitions import get_competition_priorities_kv_pair
-from matches import create_match_data
-from squad_handler import SquadHandler
-from squads import create_schedule_data
+from server.data_processing.competitions import get_competition_priorities_kv_pair
+from server.data_processing.matches import create_match_data
+from server.data_processing.squads import create_schedule_data
+from server.data_processing.preferences import get_squad_preferences
 
 import test_helper
 

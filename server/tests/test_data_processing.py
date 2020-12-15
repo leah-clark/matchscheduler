@@ -2,7 +2,7 @@ import os
 import unittest
 import pandas as pd
 from datetime import datetime
-from matches import create_match_data
+from server.data_processing.matches import create_match_data
 
 
 # todo: tests for competitions, preferences and squads
