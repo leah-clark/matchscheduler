@@ -4,7 +4,7 @@ from typing import Set
 from werkzeug.utils import secure_filename
 
 # todo: need to put this as global setting
-UPLOAD_FOLDER = os.getcwd() + os.environ["DATA_PATH"]
+UPLOAD_FOLDER = os.getcwd() + "/data/uploaded"
 ALLOWED_EXTENSIONS: Set[str] = {'csv'}
 
 

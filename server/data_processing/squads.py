@@ -1,10 +1,19 @@
 import pandas as pd
 from functools import reduce
 
+'''
+creates a schedule, sorted by date, with each squad and their respective hours
+eg.
+Date	G	B+	C	B	E	D	D+	A	Total
+30	2019-04-15 10:00:00	56.0	48.0	64.0	0.0	8.0	0.0	0.0	72.0	248.0
+'''
+
+
 def _get_table_by_condition(data_frame, column_name, specified_value):
     return data_frame.loc[data_frame[column_name] == specified_value]
 
-def format(schedule):
+
+def create_schedule_data(schedule):
     dfs = []
 
     squads = set(schedule['Squad'])
@@ -14,9 +23,9 @@ def format(schedule):
         squad_data = []
         for row in available_by_squad.itertuples():
             if row.Shift == 'Night':
-                squad_data.append([pd.to_datetime(row.Date + " " + "18:00"), row.Quantity])
+                squad_data.append([pd.to_datetime(row.Date + " " + "18:00"), row.Quantity * 8])
             else:
-                squad_data.append([pd.to_datetime(row.Date + " " + "10:00"), row.Quantity])
+                squad_data.append([pd.to_datetime(row.Date + " " + "10:00"), row.Quantity * 8])
 
         dfs.append(pd.DataFrame(squad_data, columns=['Date', squad]))
 
