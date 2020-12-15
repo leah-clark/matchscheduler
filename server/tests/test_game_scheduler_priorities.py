@@ -10,6 +10,8 @@ from competitions import get_competition_priorities_kv_pair
 from matches import formats
 from squads import formats as ft
 
+import pickle
+
 import test_helper
 
 
@@ -18,8 +20,8 @@ class TestGameScheduler(unittest.TestCase):
     def test_sub_scheduler_data_set_1(self):
         # given
         shift_time = datetime(year=2019, month=4, day=16, hour=10, minute=0)
-        squads_by_date = test_helper.get_squads(1)
-        matches = test_helper.get_matches(1)
+        squads_by_date = test_helper.get_squads()
+        matches = test_helper.get_matches()
         preferences = get_squad_preferences(pd.read_csv("testdata/preferences.csv"))
         # when
         squad_letters = ['B+', 'E', 'D+', 'G', 'D', 'B', 'C', 'A']
@@ -47,7 +49,7 @@ class TestGameScheduler(unittest.TestCase):
         preferences = get_squad_preferences(pd.read_csv("testdata/preferences.csv"))
         competitions = get_competition_priorities_kv_pair(priorities, competition_data)
         # when
-        squad_letters = ['B+', 'E', 'D+', 'G', 'D', 'B', 'C', 'A']
-        final_schedule = schedule(matches, preferences, squads, squad_letters, competitions)
+        final_schedule = schedule(matches, preferences, squads, competitions)
+
         print(final_schedule)
 

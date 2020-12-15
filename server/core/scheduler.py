@@ -1,108 +1,68 @@
-from datetime import datetime, timedelta
 import pandas as pd
-from operator import attrgetter
 
-from finished_games import get_finished_games
+from game_handler import GameHandler, Priorities
+from squad_handler import SquadHandler
 
-from models.Squad import Squad
+class Scheduler:
+    def __init__(self, squad_scheduler, game_scheduler):
+        self.game_scheduler = game_scheduler
+        self.squad_scheduler = squad_scheduler
 
+    def add_match_to_schedule(self, time_taken, squad, game):
+        squad.add_match_id(game)
+        print("Match added to schedule... ")
+        squad.hours -= time_taken
+        game.assign_game(squad)
 
-def populate_squads(available_squads, squad_letters, shift_time, squad_preferences):
-    squads = []
-    for letter in squad_letters:
-        squad = Squad(name=letter, hours=available_squads[letter].values[0], shift_time=shift_time)
-        squad.preferences = squad_preferences[letter]
-        squads.append(squad)
-    return squads
-
-
-def find_squad_with_most_hours(squads):
-    return max(squads, key=attrgetter('hours'))
-
-
-def reassign_game(row, squads, carry_over_ids):
-    squad = find_squad_with_most_hours(squads)
-    #print("Squad: " + str(squad.name))
-    if squad.hours > 10:
-        squad = add_match_to_schedule(10, squad, row.ID)
-    else:
-        #print("This game will have to be carried over to tomorrow..")
-        carry_over_ids.append(row.ID)
-    return squad, carry_over_ids
-
-
-def get_preferred_squad(squads, row):
-    for squad in squads:
-        if (row.Competition in squad.preferences):
-            return squad
-    return None
-
-
-def add_match_to_schedule(time_taken, squad, match_id):
-    squad.add_match_id(match_id)
-    #print("Match added to schedule... ")
-    squad.hours -= time_taken
-    return squad
-
-
-def schedule_days_matches(shift_time, matches, preferences, available_squads, squad_letters):
-    squads = populate_squads(available_squads, squad_letters, shift_time, preferences)
-    carry_over_ids = []
-    # this searches in 'deadline' order
-    for row in matches.itertuples():
-        # get the squad that prefers this competition
-        # assume 1 preference for 1 team for 1 competition
-        squad = get_preferred_squad(squads, row)
-        #print("Competition: " + row.Competition)
-
-        if row.Deadline < shift_time:
-            time_late = shift_time - row.Deadline
-            print("Game " + str(row.ID) + " is late by " + str(time_late))
-
-        # if the squad is prefered - asign game
-        if squad and squad.hours > 8:
-            #print("Squad: " + str(squad.name))
-            #print("Scheduling via preferece.. ")
-            squad = add_match_to_schedule(8, squad, row.ID)
-        # if not then give to squad wiht most availability
+    def reassign_game(self, game):
+        squad = self.squad_handler.find_squad_with_most_hours()
+        print("Squad: " + str(squad.name))
+        if squad.hours > 10:
+            self.add_match_to_schedule(10, squad, game)
+            game.assign_game(squad)
         else:
-            #print("Scheduling via size of squad.. ")
-            squad, carry_over_ids = reassign_game(row, squads, carry_over_ids)
-        # if any games left over - get put in next round, sorted in order
-    return squads, carry_over_ids
+            print("This game will have to be carried over to tomorrow..")
 
+    def get_preferred_squad(self, game):
+        return self.squad_handler.get_preferred_squad(game)
 
-def add_priority_hours(org_date, priorities):
-    return org_date + priorities.pop()
+    def sort_games(self):
+        self.game_scheduler.sort_games()
 
+    def filter_unassgined_games(self):
+        return self.squad_scheduler()
 
-def calculate_priority_hours(competitions, finished_games):
-    priorities = []
-    for game in finished_games.itertuples():
-        priorities.append(pd.offsets.Hour(competitions[game.Competition]))
-    return priorities
+    def get_squads(self):
+        return self.squad_scheduler.squads
 
+def schedule_days_matches(shift_time, scheduler):
+    # this searches in 'deadline' order
+    games = scheduler.sort_games()
+    unassigned_games = []
+    if games:
+        for game in scheduler.sort_games():
+            # get the squad that prefers this competition
+            # assume 1 preference for 1 team for 1 competition
+            squad = scheduler.get_preferred_squad(game)
+            print("Competition: " + game.Competition)
 
-def get_games(row, competitions, matches):
-    end_time = row.Date
-    if end_time.strftime('%H, %M') == "10, 00":
-        start_time = end_time - timedelta(hours=16)
-    else:
-        start_time = end_time - timedelta(hours=8)
-    # when
-    finished_games = get_finished_games(start_time, end_time, matches)
+            if game.Deadline < shift_time:
+                time_late = shift_time - game.Deadline
+                print("Game " + str(game.ID) + " is late by " + str(time_late))
 
-    priorities = calculate_priority_hours(competitions, finished_games)
+            # if the squad is prefered - asign game
+            if squad and squad.hours > 8:
+                print("Squad: " + str(squad.name))
+                print("Scheduling via preferece.. ")
+                scheduler.add_match_to_schedule(8, squad, game)
 
-    finished_games['Deadline'] = finished_games['Finish Date & Time'].apply(
-        lambda org_date: add_priority_hours(org_date, priorities))
-
-    return finished_games
-
-
-def add_games(games, carry_over_ids, matches):
-    carry_over_games = matches[matches['ID'].isin(carry_over_ids)]
-    return pd.concat([games, carry_over_games])
+            # if not then give to squad wiht most availability
+            else:
+                print("Scheduling via size of squad.. ")
+                scheduler.reassign_game(game)
+            # if any games left over - get put in next round, sorted in order
+            unassigned_games = scheduler.filter_unassgined_games()
+    return scheduler.get_squads(), unassigned_games
 
 
 def sort_output(squads, match_schedule, date):
@@ -116,25 +76,28 @@ def sort_output(squads, match_schedule, date):
     return match_schedule
 
 
-def schedule(matches, preferences, squads_df, squad_letters, competitions):
+def schedule(matches_df, preferences, squads_df, competitions):
     match_schedule = []
-    carry_over_ids = []
+    priorities = Priorities()
+    unassigned_games = []
     # this will get looped
     for row in squads_df.itertuples():
-        games = get_games(row, competitions, matches)
-        games_plus_carryover = add_games(games, carry_over_ids, matches)
-        games_plus_carryover_sorted = games_plus_carryover.sort_values('Deadline')
+        game_handler = GameHandler(matches_df, priorities, competitions, unassigned_games)
+        game_handler.populate_games(row.Date)
+        squad_handler = SquadHandler(squads_df)
+        squad_handler.populate_squads(row.Date, preferences)
 
-        #print("Shift is: " + str(row.Date))
+        scheduler = Scheduler(squad_handler, game_handler)
 
-        available_squads = squads_df.loc[squads_df['Date'] == row.Date]
+        # Sort by deadline so we have most urgent games being worked on first
 
-        squads, carry_over_ids = schedule_days_matches(
-            row.Date, games_plus_carryover_sorted, preferences, available_squads, squad_letters)
+        print("Shift is: " + str(row.Date))
+
+        squads, unassigned_games = schedule_days_matches(row.Date, scheduler)
 
         match_schedule = sort_output(squads, match_schedule, row.Date)
 
-    print("games not watched: " )
-    for game in carry_over_ids:
+    print("games not watched: ")
+    for game in unassigned_games:
         print(game)
     return pd.DataFrame(match_schedule, columns=['Date', 'Squad', 'Game ID'])
